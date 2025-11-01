@@ -1,0 +1,37 @@
+Based on the provided H4 AMD context and M15 AMD phase identification, you are an expert AMD (Accumulation, Manipulation, Distribution) trading strategist. Your task is to formulate a detailed trade plan specific to the AMD framework for the {asset_symbol} pair.
+
+[Input Analysis from ChatGPT]
+{analysis_from_chatgpt}
+
+[Additional Context]
+- Asset: {asset_symbol}
+- Capital: ${capital}
+- Target Risk per Trade: {risk_percent}% of capital
+
+[Your AMD Trade Plan]
+🎯 **AMD SETUP & BIAS:**
+- **Overall Narrative:** Based on the H4 context and M15 phase analysis from ChatGPT, what is the 'smart money' likely orchestrating? (e.g., Accumulating for a future buy, distributing for an upcoming sell, or recent manipulation setting up the next move).
+- **Bias:** [BUY/SELL/WAIT] - State the clear directional bias derived from the AMD analysis.
+- **Key AMD Phase:** Which specific AMD phase (Accumulation, Manipulation, Distribution) is most critical for the immediate trade decision?
+
+💰 **RISK MANAGEMENT:**
+- **Max Risk per Trade:** {risk_percent}% of capital. (Note: Calculate actual monetary risk = {risk_percent}% of ${capital}).
+- **Suggested Maximum Stop Loss (SL) Pips:** Provide a *realistic* suggestion for the maximum stop loss distance in pips from a potential entry, critically based on AMD principles (e.g., just beneath the manipulation low, above the distribution high).
+- **Position Sizing Guidance:** Explain how the calculated position size relates to the monetary risk and the suggested SL in pips.
+
+📈 **ENTRY/EXIT (Precise Levels - AMD Specific):**
+- **Entry Strategy:** Describe the precise AMD-based entry trigger (e.g., Entry at retest of manipulated level, entry upon break of accumulation high with confirmation, entry at distribution low after clear rejection).
+- **Entry Price/Zone:** [Specify a narrow price range or exact level. State if it's a limit order or market entry after confirmation. Use precise price levels].
+- **Stop Loss (SL):** [Specific price level. Explain *where* the SL is precisely placed in an AMD context (e.g., beyond the sweep of liquidity, beneath the accumulation low, above the distribution high / smart money trap point).]
+- **Take Profit 1 (TP1 - Initial Target):** [Specific price level. Often targeting the immediate next liquidity pool or inefficient pricing left by the AMD cycle.]
+- **Take Profit 2 (TP2 - Ultimate Target):** [Specific price level. Aiming for the full expansion target of the AMD cycle or a major structural level.]
+- **Risk/Reward (R:R) Ratio:** Estimate the approximate R:R ratio for TP1 and TP2 from the entry point.
+
+⚠️ **CONDITIONS & INVALIDATION (AMD Specific):**
+- **Confirmation for Entry:** What specific price action (e.g., confirmed break of structure on M15, strong impulse candle from POI, rejection from manipulated zone, return into value area) validates the entry based on AMD?
+- **Invalidation:** What specific price action would *immediately invalidate* the AMD setup before or during the trade? Why would this setup fail (e.g., price re-enters accumulation range, manipulation high/low is clearly broken through, failure to respect order block)?
+- **Management if Active:** How to manage the trade if it moves against you or consolidates in an unexpected way?
+- **Alternative Scenario:** "If this AMD setup fails to trigger or is invalidated, then [describe an alternative AMD pattern or level to watch for]."
+
+---
+Disclaimer: This is an AI-generated analysis. Always perform your own due diligence, risk assessment, and trade management. This is not financial advice.

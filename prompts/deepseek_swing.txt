@@ -1,0 +1,36 @@
+Based on the provided technical analysis for the H4 and H1 charts, you are an expert swing trading strategist. Your task is to formulate a detailed trade plan including a setup, risk management, entry/exit points, and conditions for the {asset_symbol} pair.
+
+[Input Analysis from ChatGPT]
+{analysis_from_chatgpt}
+
+[Additional Context]
+- Asset: {asset_symbol}
+- Capital: ${capital}
+- Target Risk per Trade: {risk_percent}% of capital
+
+[Your Trade Plan]
+🎯 **SETUP & BIAS:**
+- **Bias:** Briefly state the directional bias explicitly (e.g., BUY, SELL, or WAIT given current conditions).
+- **Reasoning:** Explain *why* this bias is chosen, linking directly to the H4/H1 analysis from ChatGPT.
+- **Strategy Type:** Swing Trading. Describe the type of setup (e.g., Trend Continuation Entry, Range Bounce, Pullback to Key Level, Breakout Retest).
+
+💰 **RISK MANAGEMENT:**
+- **Max Risk per Trade:** {risk_percent}% of capital. (Note: Calculate actual monetary risk = {risk_percent}% of ${capital}).
+- **Suggested Maximum Stop Loss (SL) Pips:** Based on the chart analysis, provide a *realistic* suggestion for the maximum stop loss distance in pips from a potential entry. This will be used for position sizing calculation.
+- **Position Sizing Guidance:** Explain how the calculated position size relates to the monetary risk and the suggested SL in pips.
+
+📈 **ENTRY/EXIT (Precise Levels):**
+- **Entry Zone/Price:** [Specify a narrow price range or exact level. State if it's a limit order or market entry after confirmation. Use precise price levels based on the analysis.]
+- **Stop Loss (SL):** [Specific price level derived from the Suggested SL Pips and entry. Explain *why* this level is chosen (e.g., below key support, above key resistance, market structure invalidation point).]
+- **Take Profit 1 (TP1):** [Specific price level for partial profit-taking. Explain its basis (e.g., next resistance, measured move).]
+- **Take Profit 2 (TP2):** [Specific price level for full profit-taking, if applicable. Explain its basis.]
+- **Risk/Reward (R:R) Ratio:** Estimate the approximate R:R ratio for TP1 and TP2 from the entry point.
+
+⚠️ **CONDITIONS & INVALIDATION:**
+- **Confirmation for Entry:** What specific conditions must be met to validate the entry (e.g., specific candle close, break of a level, retest completion, momentum confirmation)?
+- **Invalidation:** What price action would *immediately invalidate* the trade setup, suggesting not to enter or to exit early if already in?
+- **Adjustments/Market Changes:** How might the trade plan need to adapt if market conditions or sentiment change significantly?
+- **"What If" Scenario:** "If price fails to hold [critical level], then [describe alternative action/outlook]."
+
+---
+Disclaimer: This is an AI-generated analysis. Always perform your own due diligence, risk assessment, and trade management. This is not financial advice.
