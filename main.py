@@ -9,6 +9,7 @@ import logging
 import time
 import re # Nouveau: pour l'analyse des commandes utilisateur
 from functools import wraps # Pour les décorateurs de nettoyage
+from io import BytesIO
 
 # Imports des bibliothèques tierces
 import nest_asyncio # Pour la compatibilité Jupyter/IPython
@@ -47,6 +48,8 @@ from config import (
     CHATGPT_AMD_VISION_PROMPT_PATH,
     DEEPSEEK_SWING_PROMPT_PATH,
     DEEPSEEK_AMD_PROMPT_PATH,
+    OPENAI_API_KEY,
+    DEEPSEEK_API_KEY,
     CHATGPT_MODEL,
     CHATGPT_BASE_SYSTEM_PROMPT_PATH,
     DEEPSEEK_MODEL,
@@ -489,44 +492,58 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 # ==============================================================================
-# Configuration principale du bot et exécution
+# Main Bot Setup & Execution (Version FINALEMENT Corrigée)
 # ==============================================================================
 
 def main() -> None:
-    """Démarre le bot."""
-    if not TELEGRAM_TOKEN:
-        logger.error("TELEGRAM_TOKEN n'est pas défini. Veuillez le définir dans config.py ou comme variable d'environnement.")
+    """Starts the bot."""
+    if not TELEGRAM_TOKEN or TELEGRAM_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN":
+        logger.error("TELEGRAM_TOKEN n'est pas défini ou utilise la valeur par défaut. "
+                     "Veuillez le configurer dans .env ou config.py.")
         return
+    
+    # --- Définir la fonction post_init_job_queue ---
+    # Cette fonction est appelée APRÈS que l'application soit initialisée,
+    # y compris la JobQueue si elle est activée.
+    async def post_init_job_queue(app: Application):
+        if app.job_queue: # Vérifie si job_queue est bien disponible
+            # Planifier la tâche de nettoyage
+            app.job_queue.run_repeating(scheduled_cleanup, interval=USER_DATA_CLEANUP_INTERVAL_SECONDS, first=10)
+            logger.info("Tâche de nettoyage des données utilisateur planifiée.")
+        else:
+            logger.warning("JobQueue non disponible. Assurez-vous d'avoir installé 'python-telegram-bot[job-queue]'. "
+                           "La tâche de nettoyage périodique ne sera pas exécutée et aucune job ne pourra être ajoutée.")
 
-    application = Application.builder().token(TELEGRAM_TOKEN).allowed_updates(ALLOWED_UPDATES).build()
+    # Construire l'application en utilisant post_init et with_job_queue
+    application = Application.builder() \
+        .token(TELEGRAM_TOKEN) \
+        .post_init(post_init_job_queue) \
+        .build()
 
     # --- Configuration du ConversationHandler ---
     trade_analysis_conversation_handler = ConversationHandler(
         entry_points=[CommandHandler("analyze", analyze_entry_point)],
         states={
-            GET_TRADE_PARAMS: [MessageHandler(filters.COMMAND('trade') & filters.TEXT & ~filters.ChatType.CHANNEL, get_trade_parameters)],
+            GET_TRADE_PARAMS: [MessageHandler(filters.Regex(r'^/trade\s+([A-Za-z0-9]+)\s+([A-Za-z]+)\s+([\d,\.]+)$') & ~filters.ChatType.CHANNEL, get_trade_parameters)],
             WAITING_H4_IMAGE: [MessageHandler(filters.PHOTO & ~filters.ChatType.CHANNEL, receive_h4_image)],
             WAITING_H1_IMAGE: [MessageHandler(filters.PHOTO & ~filters.ChatType.CHANNEL, receive_h1_image)],
             WAITING_M15_IMAGE: [MessageHandler(filters.PHOTO & ~filters.ChatType.CHANNEL, receive_m15_image)],
         },
         fallbacks=[CommandHandler("cancel", cancel_command)],
-        allow_reentry=True # Permet aux utilisateurs de redémarrer avec /analyze n'importe quand
+        allow_reentry=True
     )
 
     # --- Ajout des gestionnaires de commandes régulières ---
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", status_command))
-    application.add_handler(CommandHandler("cancel", cancel_command)) # Un global /cancel
+    application.add_handler(CommandHandler("cancel", cancel_command))
 
     # --- Ajout du gestionnaire de conversation ---
     application.add_handler(trade_analysis_conversation_handler)
 
-    # --- Planifier la tâche de nettoyage ---
-    application.job_queue.run_repeating(scheduled_cleanup, interval=USER_DATA_CLEANUP_INTERVAL_SECONDS, first=10) # Nettoyage après 10s, puis toutes les heures
-
     logger.info("Bot TradeGenie démarré (polling)...")
-    application.run_polling(drop_pending_updates=True)
+    application.run_polling(drop_pending_updates=True, allowed_updates=ALLOWED_UPDATES)
 
 if __name__ == "__main__":
     main()
