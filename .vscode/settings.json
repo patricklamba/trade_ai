@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./",  // Ajoutez la racine du projet comme chemin supplémentaire
+        "./utils", // Et les sous-dossiers pour la bonne mesure
+        "./llm_integrations"
+    ]
+}

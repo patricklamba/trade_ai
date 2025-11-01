@@ -8,7 +8,7 @@ import logging
 # Add current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils import cleanup_old_user_data
+from utils.data_management import cleanup_old_user_data
 from config import USER_DATA_CLEANUP_INTERVAL_SECONDS, LOGGING_LEVEL, LOGGING_FORMAT
 
 # Temporarily reduce cleanup interval for quick testing

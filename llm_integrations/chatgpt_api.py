@@ -15,7 +15,7 @@ from config import (
     CHATGPT_BASE_SYSTEM_PROMPT_PATH, # We need to add this to config.py
     PROMPT_DIR
 )
-from utils import image_to_base64 # To encode images
+from utils.image_processing import image_to_base64 # To encode images
 
 logger = logging.getLogger(__name__)
 

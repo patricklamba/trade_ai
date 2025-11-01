@@ -10,7 +10,7 @@ from io import BytesIO
 # Add current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils import convert_image_to_png, image_to_base64
+from utils.image_processing import convert_image_to_png, image_to_base64
 from config import LOGGING_LEVEL, LOGGING_FORMAT
 
 # Setup minimal logging

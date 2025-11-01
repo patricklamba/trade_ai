@@ -17,7 +17,7 @@ from config import (
     CLAUDE_BASE_SYSTEM_PROMPT_PATH,
     PROMPT_DIR # To load prompts dynamically
 )
-from utils import image_to_base64 # To encode images
+from utils.image_processing import image_to_base64 # To encode images
 
 logger = logging.getLogger(__name__)
 
