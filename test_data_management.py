@@ -8,7 +8,7 @@ import logging
 # Add current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils.data_management import cleanup_old_user_data
+from utils import cleanup_old_user_data
 from config import USER_DATA_CLEANUP_INTERVAL_SECONDS, LOGGING_LEVEL, LOGGING_FORMAT
 
 # Temporarily reduce cleanup interval for quick testing
@@ -42,7 +42,7 @@ def test_cleanup_old_user_data():
         USER_DATA_CLEANUP_INTERVAL_SECONDS = TEMP_CLEANUP_INTERVAL
     
     # Temporarily modify the config module's constant (this isn't super clean, but works for quick tests)
-    import utils.data_management
+    import utils
     utils.data_management.USER_DATA_CLEANUP_INTERVAL_SECONDS = TEMP_CLEANUP_INTERVAL
     logger.warning(f"Temporarily setting cleanup interval to {TEMP_CLEANUP_INTERVAL}s for testing.")
 

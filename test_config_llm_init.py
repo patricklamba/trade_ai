@@ -13,9 +13,9 @@ from config import (
     CLAUDE_MODEL, DEEPSEEK_MODEL, CHATGPT_MODEL,
     LOGGING_LEVEL, LOGGING_FORMAT
 )
-from llm_integrations.claude_api import claude_client # Import the global client
-from llm_integrations.deepseek_api import logger as deepseek_logger # To get DeepSeek's specific logger
-from llm_integrations.chatgpt_api import openai_client # Import the global client
+from llm_integrations import claude_client # Import the global client
+from llm_integrations import logger as deepseek_logger # To get DeepSeek's specific logger
+from llm_integrations import openai_client # Import the global client
 
 # Setup minimal logging for this test script
 logging.basicConfig(level=LOGGING_LEVEL, format=LOGGING_FORMAT)
