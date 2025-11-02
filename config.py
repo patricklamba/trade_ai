@@ -32,13 +32,15 @@ DEFAULT_RISK_PERCENT = 1.0 # Default risk per trade, in percentage
 DEFAULT_LOT_SIZE_MULTIPLIER = 100000 # Standard lot size for forex/futures (e.g., 100,000 units for forex)
 
 # Asset Definitions (extendable later)
-SUPPORTED_ASSETS = ["XAUUSD", "EURUSD"]
+SUPPORTED_ASSETS = ["XAUUSD", "EURUSD","GBPUSD", "NAS100"]
 # Define pip values per 1 standard lot for calculating risk
 # Example: For XAUUSD, 1 lot = 100 oz. If 1 pip = $0.10/oz, then 1 pip/lot = $10.
 # For EURUSD, 1 lot = 100,000 units. If 1 pip = $0.0001, then 1 pip/lot = $10.
 ASSET_PIP_VALUES = {
     "XAUUSD": 10,
     "EURUSD": 10,
+    "GBPUSD": 10,
+    "NAS100": 1,  
 }
 
 # Module Definitions (extendable later)
