@@ -10,6 +10,7 @@ import time
 import re # Nouveau: pour l'analyse des commandes utilisateur
 from functools import wraps # Pour les décorateurs de nettoyage
 from io import BytesIO
+from telegram import Message
 
 # Imports des bibliothèques tierces
 import nest_asyncio # Pour la compatibilité Jupyter/IPython
@@ -356,13 +357,14 @@ async def receive_m15_image(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Lance l'analyse des LLM en utilisant les images et paramètres collectés."""
     user_id = update.effective_user.id
-    user_data = user_conversation_data.get(user_id) # On l'appelle user_data localement
+    user_data = user_conversation_data.get(user_id)
 
     if not user_data: # Double vérification, si le décorateur ne suffit pas
         await update.message.reply_text("❌ Session expirée ou données manquantes. Veuillez recommencer avec /analyze.", parse_mode='Markdown')
         return ConversationHandler.END
 
-    await update.message.reply_text(
+    # Envoyer un message de chargement et le stocker pour l'éditer plus tard
+    progress_message: Message = await update.message.reply_text( # Import Message from telegram
         "⏳ **Analyse en cours...**\n\n"
         "• ChatGPT: Analyse technique visuelle 📊\n"
         "• DeepSeek: Élaboration de la stratégie de trading 💡\n"
@@ -392,10 +394,10 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
         images_to_send_to_chatgpt = [h4_image, m15_image]
     
     if not chatgpt_vision_user_prompt:
-        await update.message.reply_text("❌ Erreur: Prompt Vision pour ChatGPT introuvable pour ce module.")
+        await progress_message.edit_text("❌ Erreur: Prompt Vision pour ChatGPT introuvable pour ce module.")
         return ConversationHandler.END
     if not all(images_to_send_to_chatgpt): # Vérifie si toutes les images nécessaires sont là
-        await update.message.reply_text("❌ Erreur: Images requises (H4/H1 ou H4/M15) manquantes pour l'analyse vision.")
+        await progress_message.edit_text("❌ Erreur: Images requises (H4/H1 ou H4/M15) manquantes pour l'analyse vision.")
         return ConversationHandler.END
     
     # --- Appel à ChatGPT Vision ---
@@ -409,7 +411,7 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # Vérifier si ChatGPT a retourné une erreur
     if chatgpt_analysis_text.startswith("❌"):
-        await update.message.reply_text(f"❌ Erreur lors de l'analyse Vision par ChatGPT: {chatgpt_analysis_text}\n"
+        await progress_message.edit_text(f"❌ Erreur lors de l'analyse Vision par ChatGPT: {chatgpt_analysis_text}\n"
                                         "Veuillez réessayer ou contacter le support.", parse_mode='Markdown')
         return ConversationHandler.END
 
@@ -422,24 +424,21 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
         deepseek_strategy_prompt_template = _load_prompt_from_file(DEEPSEEK_AMD_PROMPT_PATH)
     
     if not deepseek_strategy_prompt_template:
-        await update.message.reply_text("❌ Erreur: Prompt de stratégie pour DeepSeek introuvable pour ce module.")
+        await progress_message.edit_text("❌ Erreur: Prompt de stratégie pour DeepSeek introuvable pour ce module.")
         return ConversationHandler.END
 
-    # Calculer la taille de position initiale pour le prompt DeepSeek
-    # DeepSeek n'a pas besoin de la taille finale mais des chiffres pour construire le plan
-    # Nous pourrions prendre une SL 'générique' et laisser DeepSeek affiner, ou la laisser vide.
-    # Pour l'instant, on laisse DeepSeek suggérer un SL et on le calcule après si besoin.
-    # On passe le capital, le risque %
-    
     # Formatter le prompt DeepSeek avec l'analyse de ChatGPT et les données utilisateur
+    # Note: DeepSeek est invité à suggérer SL Pips, etc.
     deepseek_formatted_prompt = deepseek_strategy_prompt_template.format(
-        analysis_from_chatgpt=chatgpt_analysis_text, # Renommé pour être plus générique suite à l'absence de Claude
+        analysis_from_chatgpt=chatgpt_analysis_text,
         asset_symbol=asset,
         capital=f"{capital:,.0f}", # Formatté pour le prompt
         risk_percent=f"{DEFAULT_RISK_PERCENT:.1f}", # Le prompt DeepSeek doit utiliser cette variable
-        risk_amount="?", # DeepSeek calculera cela basé sur son SL suggéré ou nous le ferons après
-        position_size_lots="?", # DeepSeek calculera cela basé sur son SL suggéré
-        stop_loss_pips="?" # DeepSeek suggérera ceci
+        # Les valeurs suivantes seront remplies par DeepSeek, ou il devra les calculer
+        # C'est pourquoi nous les laissons en tant qu'espaces réservés pour le prompt
+        risk_amount="?",
+        position_size_lots="?",
+        stop_loss_pips="?"
     )
 
     deepseek_trading_plan = await get_deepseek_chat_completion(
@@ -451,7 +450,7 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # Vérifier si DeepSeek a retourné une erreur
     if deepseek_trading_plan.startswith("❌"):
-        await update.message.reply_text(f"❌ Erreur lors de l'élaboration du plan de trading par DeepSeek: {deepseek_trading_plan}\n"
+        await progress_message.edit_text(f"❌ Erreur lors de l'élaboration du plan de trading par DeepSeek: {deepseek_trading_plan}\n"
                                         "Veuillez réessayer ou contacter le support.", parse_mode='Markdown')
         return ConversationHandler.END
 
@@ -469,23 +468,50 @@ async def start_llm_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     final_message = "\n".join(final_message_parts)
 
-    # Gérer les messages longs (Telegram limite à 4096 caractères)
-    if len(final_message) > 4000:
-        # Tenter de couper intelligemment le message, par exemple à la fin de l'analyse technique
-        # et commencer le plan de trading dans un nouveau message
-        split_point = final_message.find("--- **Plan de Trading (par DeepSeek)** ---")
-        if split_point != -1 and split_point < 3500: # Assure que la première partie est assez grande
-            part1 = final_message[:split_point].strip() + "\n\n(Suite de l'analyse ci-dessous...)"
-            part2 = final_message[split_point:].strip()
+    telegram_message_limit = 4096 # Limite réelle de Telegram
 
-            await update.message.reply_text(part1, parse_mode='Markdown')
+    # Gestion des messages longs
+    if len(final_message) > telegram_message_limit:
+        # Tenter une coupure intelligente pour la première partie
+        # Utiliser un marqueur spécifique pour la coupure
+        split_marker_for_deepseek = "\n--- **Plan de Trading (par DeepSeek)** ---\n"
+        split_point = final_message.find(split_marker_for_deepseek)
+
+        # Vérifier si la première partie est suffisamment grande pour être significative
+        # et si le point de coupure n'est pas trop proche de la fin de la limite Telegram
+        if split_point != -1 and split_point < (telegram_message_limit - len(split_marker_for_deepseek) - 50):
+            part1 = final_message[:split_point].strip() + f"\n\n(Suite de l'analyse ci-dessous...)\n{split_marker_for_deepseek.strip()}"
+            part2 = final_message[split_point + len(split_marker_for_deepseek):].strip()
+
+            # Éditer le message de progression avec la première partie
+            await progress_message.edit_text(part1, parse_mode='Markdown')
+            # Envoyer la deuxième partie comme un nouveau message
             await update.message.reply_text(part2, parse_mode='Markdown')
         else:
-            # Si pas de split intelligent possible, juste couper par longueur brute
-            for i in range(0, len(final_message), 4000):
-                await update.message.reply_text(final_message[i:i+4000], parse_mode='Markdown')
+            # Si pas de split intelligent possible, couper brutalement en morceaux de taille maximale
+            chunks = []
+            current_chunk_start = 0
+            while current_chunk_start < len(final_message):
+                end_index = min(current_chunk_start + telegram_message_limit, len(final_message))
+                chunk = final_message[current_chunk_start:end_index]
+                # Essayer de couper à la fin d'une ligne pour éviter les mots coupés
+                if end_index < len(final_message) and final_message[end_index-1] != '\n':
+                    last_newline = chunk.rfind('\n')
+                    if last_newline != -1 and last_newline > 0:
+                        chunk = chunk[:last_newline]
+                        end_index = current_chunk_start + len(chunk)
+                
+                chunks.append(chunk.strip())
+                current_chunk_start = end_index
+
+            # Envoyer la première 'chunk' en éditant le message de progression
+            await progress_message.edit_text(chunks[0], parse_mode='Markdown')
+            # Envoyer les chunks suivantes comme de nouveaux messages
+            for chunk in chunks[1:]:
+                await update.message.reply_text(chunk, parse_mode='Markdown')
     else:
-        await update.message.reply_text(final_message, parse_mode='Markdown')
+        # Si le message est court, éditer le message de progression avec le message final
+        await progress_message.edit_text(final_message, parse_mode='Markdown')
 
     logger.info(f"Utilisateur {user_id}: Analyse terminée et envoyée.")
     return ConversationHandler.END

@@ -23,3 +23,4 @@ Provide a detailed AMD analysis structured as follows:
 - Synthesize the H4 context and M15 phase. What is the most probable narrative for "smart money" action (e.g., "H4 accumulation, M15 manipulation to grab liquidity before expansion", "H4 distribution, M15 final manipulation into sell-off")?
 
 Present only the AMD analysis. Do not provide trade setups, entry/exit points, or risk management recommendations in this response.
+ALWAYS RESPOND IN FRENCH.

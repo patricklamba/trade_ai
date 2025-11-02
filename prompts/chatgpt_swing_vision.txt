@@ -21,3 +21,4 @@ Provide a comprehensive technical analysis structured as follows:
 - Any other crucial technical observations from comparing both timeframes (e.g., potential divergences, confluence of levels, notable candle formations at critical points).
 
 Present only the cohesive technical analysis. Do not provide trade setups, entry/exit points, or risk management recommendations in this response.
+ALWAYS RESPOND IN FRENCH.
